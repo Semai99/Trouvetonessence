@@ -1,0 +1,296 @@
+<html lang="en">
+  <body>
+    <div id="elements">
+      
+      <div id="carte">
+          <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZSA-7PEiaq8X_zc3402GlJJ5BhoEpayE&callback=initMap"
+          defer
+        ></script>
+        <script type="text/javascript" src="/script/googlemaps.js"></script>
+      </div>
+      
+      <div id="recherche">
+        <form action="/index" method="post" id="search_form"  autocomplete="off">
+          <div class="form-row">
+            <ul style="list-style: none;">
+              <li>
+                <label class="input_label">Gazole</label>
+                <input class="fuel_choice" type="checkbox" name="Gazole" {{#if Gazole}}checked{{/if}}/>
+              </li>
+              <li>
+                <label class="input_label">SP98</label>
+                <input class="fuel_choice" type="checkbox" name="SP98" {{#if SP98}}checked{{/if}}/>
+              </li>
+              <li>
+                <label class="input_label">SP95</label>
+                <input class="fuel_choice" type="checkbox" name="SP95" {{#if SP95}}checked{{/if}}/>
+              </li>
+              <li>
+                <label class="input_label">E85</label>
+                <input class="fuel_choice" type="checkbox" name="E85" {{#if E85}}checked{{/if}}/>
+              </li>
+              <li>
+                <label class="input_label">E10</label>
+                <input class="fuel_choice" type="checkbox" name="E10" {{#if E10}}checked{{/if}}/>
+              </li>
+              <li>
+                <label class="input_label">GPLc</label>
+                <input class="fuel_choice" type="checkbox" name="GPLc" {{#if GPLc}}checked{{/if}}/>
+              </li>
+            </ul>
+          </div>
+          <div class="form-row">
+            <div style="margin-bottom: 5px;">
+              <label class="input_label" style="margin-right: 5px;">Recherche par</label>
+              
+              <input type="radio" id="radio_dep" name="radio" onclick = "replace_dep()" checked>
+              <input type="text" id="labeldep" name="radiod" value="true" style="display:none">              
+              <label for="radio_dep" style="margin-right: 5px;">Département</label>
+              
+              <input type="radio" id="radio_ville" name="radio" onclick = "replace_ville()">
+              <input type="text" id="labelville" name="radiov" value="" style="display:none">              
+              <label for="radio_ville">Ville</label>
+              <script type = "text/javascript">
+                // remplace la div ville par la div département
+                function replace_dep() {
+                  document.getElementById("search_mode_1").style.display="block";
+                  document.getElementById("search_mode_2").style.display="none";
+                  document.getElementById("input-ville").value="";
+                  document.getElementById("labeldep").value="true";
+                  document.getElementById("labelville").value="";
+                }
+                // remplace la div département par la div ville
+                function replace_ville() {
+                  document.getElementById("search_mode_2").style.display="block";
+                  document.getElementById("search_mode_1").style.display="none";
+                  document.getElementById("input-departement").value="";
+                  document.getElementById("labeldep").value="";
+                  document.getElementById("labelville").value="true";
+                }
+              </script>
+            </div>
+              <div id="search_mode_1" style="display:block">
+                <label class="input_label" for="departement-recherche">Département</label>
+                <div class="autocomplete">
+                  <input id="input-departement" type="text" name="departement-recherche" placeholder="Département à rechercher...">
+                </div>
+              </div>
+              <script type="text/javascript" src="/script/autocomplete.js"></script>
+              <script>
+                autocomplete(document.getElementById("input-departement"), departements_tab);
+              </script>
+              <div id="search_mode_2" style="display:none">
+                <label class="input_label" for="ville-recherche">Ville</label>
+                <div class="autocomplete">
+                  <input type="text" id="input-ville" name="ville-recherche" placeholder="Ville à rechercher..."/>
+                </div>
+              </div>
+              <!-- <script type="text/javascript" src="/script/autocomplete.js"></script>
+              <script>
+                var JsonVille = fs.readFileSync("ville.json");
+                var villes = JSON.parse(JsonVille);
+                console.log("utilise le script d'auto complétion");
+                console.log(villes);
+                autocomplete(document.getElementById("input-ville"), villes);
+              </script> -->             
+              <input class="fuel_choice" type="submit" value="Rechercher"/>
+          </div>
+        </form>
+      </div>
+      <script>
+          const form = document.getElementById('search_form')
+          form.addEventListener('submit', search_form)
+          
+          // Verifie le mode selectionné et le texte entré, et submit le form si valide
+          async function search_form(event) {
+            event.preventDefault()
+            if  (document.getElementById('radio_dep').checked) {
+              const dep_value = document.getElementById("input-departement").value;
+                if (!departements_tab.includes(dep_value)) {
+                  alert("le nom de département n'est pas correct");
+                } else {
+                  form.submit();
+                }
+            }
+            if  (document.getElementById('radio_ville').checked) {
+              const ville_value = document.getElementById("input-ville").value;
+              form.submit();
+            }
+          }
+      </script>
+    </div>
+
+    <div id="tableau">
+      <table id="tableau_resultats"  class="result-table">
+        <thead>
+          <tr>
+            <th>
+              Stations{{#if Departement}} ({{Departement}}){{/if}}{{#if Ville}} ({{Ville}}){{/if}}
+            </th>
+            {{#if Gazole}}
+              <th>
+                <input type="radio" id="radio_Gazole" name="radio_essence" onchange="submit_form_1(this)" {{#if (check_name e1 'Gazole')}}checked{{/if}}/>
+                <script>
+                  function submit_form_1(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_1").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_1" style="display:none">
+                  <input type="text" name="essence" value="Gazole">
+                </form>
+                Gazole
+              </th>
+            {{/if}}
+            {{#if SP98}}
+              <th>
+                <input type="radio" id="radio_SP98" name="radio_essence" onchange="submit_form_2(this)" {{#if (check_name e1 'SP98')}}checked{{/if}}/>
+                <script>
+                  function submit_form_2(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_2").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_2" style="display:none">
+                  <input type="text" name="essence" value="SP98">
+                </form>
+                SP98
+              </th>
+            {{/if}}
+            {{#if SP95}}
+              <th>
+                <input type="radio" id="radio_SP95" name="radio_essence" onchange="submit_form_3(this)" {{#if (check_name e1 'SP95')}}checked{{/if}}/>
+                <script>
+                  function submit_form_3(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_3").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_3" style="display:none">
+                  <input type="text" name="essence" value="SP95">
+                </form>
+                SP95
+              </th>
+            {{/if}}
+            {{#if E85}}
+              <th>
+                <input type="radio" id="radio_E85" name="radio_essence" onchange="submit_form_4(this)" {{#if (check_name e1 'E85')}}checked{{/if}}/>
+                <script>
+                  function submit_form_4(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_4").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_4" style="display:none">
+                  <input type="text" name="essence" value="E85">
+                </form>
+                E85
+              </th>
+            {{/if}}
+            {{#if E10}}
+              <th>
+                <input type="radio" id="radio_E10" name="radio_essence" onchange="submit_form_5(this)" {{#if (check_name e1 'E10')}}checked{{/if}}/>
+                <script>
+                  function submit_form_5(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_5").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_5" style="display:none">
+                  <input type="text" name="essence" value="E10">
+                </form>
+                E10
+              </th>
+            {{/if}}
+            {{#if GPLc}}
+              <th>
+                <input type="radio" id="radio_GPLc" name="radio_essence" onchange="submit_form_6(this)" {{#if (check_name e1 'GPLc')}}checked{{/if}}/>
+                <script>
+                  function submit_form_6(radioObj) {
+                    if(radioObj.checked){
+                      document.getElementById("form_type_6").submit();
+                    }
+                  }
+                </script>
+                <form action="/indexTri" method="post" id="form_type_6" style="display:none">
+                  <input type="text" name="essence" value="GPLc">
+                </form>
+                GPLc
+              </th>
+            {{/if}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each address}}
+          <tr>
+            <td>
+              <div class="table-row">
+                <div>
+                  <strong>
+                    {{[1].[0]}}
+                  </strong>
+                  <br />
+                    {{[1].[1]}}
+                  <br />
+                    {{[1].[2]}}
+                </div>
+                <div>
+                  <!-- <input type="button" class ="buttonlist" value="Ajouter aux favoris" /> -->
+                  <input type="button" class ="buttonlist" value="Emplacement sur la carte" onclick="getEmplacement({{[0].[0]}},{{[0].[1]}})"/>
+                  <script> window.addEventListener('load', function() {
+                            var tab = [];
+                            {{#if ../Gazole}} tab.push("Gazole: " + "{{[2].Gazole}}"); {{/if}}
+                            {{#if ../SP98}} tab.push("SP98: " + "{{[2].SP98}}"); {{/if}}
+                            {{#if ../SP95}} tab.push("SP95: " + "{{[2].SP95}}"); {{/if}}
+                            {{#if ../E85}} tab.push("E85: " + "{{[2].E85}}"); {{/if}}
+                            {{#if ../E10}} tab.push("E10: " + "{{[2].E10}}"); {{/if}}                           
+                            {{#if ../GPLc}} tab.push("GPLc: " + "{{[2].GPLc}}"); {{/if}}
+                            setMarker({{[0].[0]}},{{[0].[1]}},"{{[1].[0]}}",{{[1].[1]}},"{{[1].[2]}}",tab);
+                          });
+                  </script>
+                </div>
+              </div>
+            </td>
+            {{#if ../Gazole}}
+            <td>
+              {{[2].Gazole}}
+            </td>
+            {{/if}}
+            {{#if ../SP98}}
+            <td>
+              {{[2].SP98}}
+            </td>
+            {{/if}}
+            {{#if ../SP95}}
+            <td>
+              {{[2].SP95}}
+            </td>
+            {{/if}}
+            {{#if ../E85}}
+            <td>
+              {{[2].E85}}
+            </td>
+            {{/if}}
+            {{#if ../E10}}
+            <td>
+              {{[2].E10}}
+            </td>
+            {{/if}}
+            {{#if ../GPLc}}
+            <td>
+              {{[2].GPLc}}
+            </td>
+            {{/if}}
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
